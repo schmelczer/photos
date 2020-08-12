@@ -1,0 +1,61 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "An easily configurable portfolio.",
+  "private": true,
+  "scripts": {
+    "start": "webpack-dev-server --mode development",
+    "build": "webpack && find dist -type f -regex \".*\\(js\\|css\\|txt\\)\" | xargs rm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schmelczerandras/timeline.git"
+  },
+  "keywords": [
+    "CV",
+    "portfolio",
+    "resume",
+    "resumé"
+  ],
+  "author": "András Schmelczer",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/schmelczerandras/timeline/issues"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "homepage": "https://github.com/schmelczerandras/timeline#readme",
+  "devDependencies": {
+    "autoprefixer": "^9.8.6",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.6.0",
+    "cssnano": "latest",
+    "file-loader": "^5.1.0",
+    "html-webpack-inline-source-plugin": "0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "image-webpack-loader": "^6.0.0",
+    "mini-css-extract-plugin": "^0.9.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "postcss-loader": "^3.0.0",
+    "prettier": "^1.19.1",
+    "resolve-url-loader": "^3.1.1",
+    "responsive-loader": "^1.2.0",
+    "sass": "^1.26.10",
+    "sass-loader": "^8.0.2",
+    "sharp": "^0.23.4",
+    "style-loader": "^1.2.1",
+    "svg-url-loader": "^3.0.3",
+    "terser-webpack-plugin": "^2.3.8",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

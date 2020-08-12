@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="67a50e5c-f550-4763-aa56-c67942ec6666" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
+  <component name="ProjectId" id="1WHpfQesortnFO5XuuiNHiPc6f1" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="prettierjs.PrettierConfiguration.Package" value="/usr/local/lib/node_modules/prettier" />
+    <property name="settings.editor.selected.configurable" value="watcher.settings" />
+    <property name="ts.external.directory.path" value="$PROJECT_DIR$/node_modules/typescript/lib" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="67a50e5c-f550-4763-aa56-c67942ec6666" name="Default Changelist" comment="" />
+      <created>1578816476846</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578816476846</updated>
+      <workItem from="1578816478170" duration="27472000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1571" y="336" width="679" height="462" key="EditFileWatcherDialog" timestamp="1578818832892">
+      <screen x="0" y="27" width="2560" height="1053" />
+    </state>
+    <state x="1571" y="336" width="679" height="462" key="EditFileWatcherDialog/0.27.2560.1053@0.27.2560.1053" timestamp="1578818832892" />
+    <state x="1699" y="311" width="424" height="491" key="FileChooserDialogImpl" timestamp="1578818955042">
+      <screen x="0" y="27" width="2560" height="1053" />
+    </state>
+    <state x="1699" y="311" width="424" height="491" key="FileChooserDialogImpl/0.27.2560.1053@0.27.2560.1053" timestamp="1578818955042" />
+    <state x="1420" y="188" width="992" height="737" key="SettingsEditor" timestamp="1578818833773">
+      <screen x="0" y="27" width="2560" height="1053" />
+    </state>
+    <state x="1420" y="188" width="992" height="737" key="SettingsEditor/0.27.2560.1053@0.27.2560.1053" timestamp="1578818833773" />
+    <state x="1533" y="257" width="774" height="592" key="find.popup" timestamp="1578852407526">
+      <screen x="0" y="27" width="2560" height="1053" />
+    </state>
+    <state x="1533" y="257" width="774" height="592" key="find.popup/0.27.2560.1053@0.27.2560.1053" timestamp="1578852407526" />
+    <state x="1583" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1578831923180">
+      <screen x="0" y="27" width="2560" height="1053" />
+    </state>
+    <state x="1583" y="259" width="672" height="678" key="search.everywhere.popup/0.27.2560.1053@0.27.2560.1053" timestamp="1578831923180" />
+  </component>
+</project>

@@ -1,0 +1,239 @@
+@mixin center-children() {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin portrait() {
+  @media (max-width: 900px) {
+    @content;
+  }
+}
+
+@mixin landscape() {
+  @media (min-width: 900px) {
+    @content;
+  }
+}
+
+$text-color: #ffffff;
+$accent-color: #a63446;
+$background-color: #eeeeee;
+$border-width: 5px;
+$normal-margin: 24px;
+$small-margin: 6px;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:focus {
+  outline: $accent-color solid $border-width * 1.1;
+  outline-offset: -$border-width * 1.1;
+}
+
+img {
+  border: $border-width solid $text-color;
+  box-sizing: content-box;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+html {
+  height: 100%;
+  overflow-x: hidden;
+  background-color: $background-color;
+
+  body {
+    display: flex;
+    overflow: hidden;
+
+    @include portrait {
+      height: 100%;
+      flex-direction: column;
+    }
+
+    @include landscape {
+      &::-webkit-scrollbar-track,
+      &::-webkit-scrollbar {
+        background-color: transparent;
+        width: 12px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: $accent-color;
+        border-radius: 1000px;
+      }
+    }
+    h1,
+    header {
+      font-family: 'Roboto', serif;
+      font-weight: 100;
+
+      @include landscape {
+        font-size: 3rem;
+      }
+
+      @include portrait {
+        font-size: 2rem;
+      }
+    }
+
+    header {
+      @include center-children;
+      box-sizing: content-box;
+      height: 100%;
+      position: relative;
+
+      @include portrait {
+        width: 100%;
+        height: 2.15ch;
+        padding: $normal-margin 0;
+      }
+
+      @include landscape {
+        width: 2.15ch;
+        height: 100vh;
+        padding: 0 $normal-margin;
+      }
+
+      h1 {
+        color: $text-color;
+        background-color: $accent-color;
+        padding: $normal-margin 0;
+
+        white-space: nowrap;
+        user-select: none;
+        z-index: 2;
+        position: fixed;
+
+        text-align: center;
+
+        @include portrait {
+          width: 100%;
+        }
+
+        @include landscape {
+          width: 101vh;
+          transform: rotate(-90deg);
+        }
+      }
+    }
+
+    main#images {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+
+      @include portrait {
+        flex-direction: column;
+      }
+
+      .cluster {
+        display: flex;
+        justify-content: space-between;
+
+        img {
+          cursor: pointer;
+        }
+
+        &#portraits > img {
+          @include portrait {
+            height: 12vmin;
+            width: auto;
+          }
+          @include landscape {
+            width: 8vmin;
+          }
+        }
+
+        &#landscapes > img {
+          @include portrait {
+            height: 8vmin;
+            width: auto;
+          }
+          @include landscape {
+            width: 12vmin;
+          }
+        }
+
+        img {
+          @include portrait {
+            margin: 0 $small-margin;
+          }
+        }
+
+        @include portrait {
+          width: 100%;
+          overflow: auto;
+          margin: $small-margin 0;
+          padding: $small-margin 0;
+          object-fit: contain;
+
+          :first-child {
+            margin-left: 2 * $small-margin;
+          }
+
+          &:last-child {
+            margin-right: 2 * $small-margin !important;
+          }
+        }
+
+        @include landscape {
+          flex-direction: column;
+          margin: $normal-margin;
+
+          img {
+            margin: $small-margin 0;
+          }
+
+          :first-child {
+            margin-top: 0;
+          }
+
+          :last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+
+      #frame-container {
+        @include center-children;
+        margin: 0 $border-width;
+
+        flex: 1;
+        @include landscape {
+        }
+
+        @include portrait {
+          position: relative;
+        }
+
+        img {
+          height: auto;
+          width: auto;
+
+          top: 50%;
+          transform: translateY(-50%) translateX(-50%);
+
+          @include portrait {
+            position: absolute;
+            box-sizing: border-box;
+            max-width: 100% !important; // undo js
+            max-height: 100%;
+            left: 50% !important; // undo js
+          }
+
+          @include landscape {
+            position: fixed;
+            max-height: 90vh;
+          }
+        }
+      }
+    }
+  }
+}
