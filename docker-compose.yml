@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   photos:
@@ -6,18 +6,14 @@ services:
     image: schmelczera/photos
     networks:
       - network
-    ports:
-      - target: 80
-        protocol: tcp
-        mode: ingress
     deploy:
       replicas: 2
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 32M
         reservations:
-          cpus: '0.2'
+          cpus: "0.2"
           memory: 32M
       placement:
         max_replicas_per_node: 1
