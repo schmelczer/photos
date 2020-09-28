@@ -1,4 +1,6 @@
 import './index.scss';
+import './no-change/404.html';
+import './no-change/robots.txt';
 import { Photos } from './photos';
 
 // @ts-ignore

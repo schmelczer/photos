@@ -57,7 +57,7 @@ module.exports = {
         loader: 'responsive-loader',
         options: {
           adapter: Sharp,
-	  quality: 90,
+          quality: 90,
           outputPath: 'static/',
           sizes: [300, 800, 1200, 2000],
           placeholder: false,
@@ -116,7 +116,7 @@ module.exports = {
         },
       },
       {
-        test: /\.ico$/i,
+        test: /no-change.*(ico|html|txt)$/i,
         use: {
           loader: 'file-loader',
           query: {

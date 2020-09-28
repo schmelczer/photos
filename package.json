@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "build": "webpack && find dist -type f -regex \".*\\(js\\|css\\|txt\\)\" | xargs rm"
+    "build": "webpack && find dist -type f -regex \".*\\(js\\|css\\|LICENSE.*\\)\" | xargs rm"
   },
   "repository": {
     "type": "git",
