@@ -1,0 +1,39 @@
+name: Check & deploy
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: docker
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '12'
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build
+        run: |
+          npm run build
+
+      - name: Copy build to host pages mount
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          apt update && apt install -y rsync
+          mkdir -p /pages/photos
+          rsync -a --delete dist/ /pages/photos/
