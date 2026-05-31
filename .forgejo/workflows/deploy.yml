@@ -10,13 +10,13 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: 'photos-${{ github.ref }}'
-  cancel-in-progress: true
-
 jobs:
   validate:
     runs-on: docker
+    # Superseded validation runs can be cancelled freely.
+    concurrency:
+      group: 'photos-validate-${{ github.ref }}'
+      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
@@ -49,6 +49,11 @@ jobs:
     runs-on: docker
     needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Never cancel an in-flight deploy: rsync --delete must finish or the live
+    # site can be left half-deleted. Newer deploys queue behind this one.
+    concurrency:
+      group: 'photos-deploy-${{ github.ref }}'
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v4

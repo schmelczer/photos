@@ -37,7 +37,7 @@ Run the full local validation suite with:
 npm run lint:check
 ```
 
-This checks the photo catalog, generates assets, checks source photos for EXIF/XMP/IPTC metadata, type-checks, lints TypeScript and SCSS, and checks formatting.
+This generates assets (validating the photo catalog against `src/pictures/` in the process), checks source photos for EXIF/XMP/IPTC metadata, type-checks, lints TypeScript and SCSS, and checks formatting.
 
 Run unit tests separately:
 

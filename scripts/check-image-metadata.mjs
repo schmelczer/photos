@@ -8,7 +8,7 @@ const rootDir = path.resolve(__dirname, '..');
 const pictureDir = path.join(rootDir, 'src/pictures');
 
 const files = (await readdir(pictureDir)).filter((file) =>
-  file.toLowerCase().endsWith('.jpg')
+  /\.jpe?g$/i.test(file)
 );
 
 const offenders = [];

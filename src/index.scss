@@ -32,7 +32,6 @@ html {
 }
 
 body {
-  min-height: 100dvh;
   block-size: 100dvh;
   margin: 0;
   display: grid;
@@ -69,7 +68,6 @@ img {
   margin: 0;
   font-size: clamp(1.5rem, 4vmin, 3rem);
   font-weight: 300;
-  letter-spacing: 0;
   line-height: 1;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -206,18 +204,8 @@ img {
   background: #5f1724;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-  }
-}
-
 @media (width < $breakpoint) {
   body {
-    min-height: 100dvh;
-    display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
   }

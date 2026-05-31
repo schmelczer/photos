@@ -1,5 +1,4 @@
 import './index.scss';
-import { photos } from './generated/photos';
 import { PhotoGallery, requiredElement } from './photos';
 
 document.documentElement.classList.add('js');
@@ -12,7 +11,6 @@ const toggle = requiredElement<HTMLButtonElement>(
 );
 
 new PhotoGallery({
-  photos,
   gallery,
   frame,
   toggle,

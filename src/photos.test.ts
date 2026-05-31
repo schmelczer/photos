@@ -1,47 +1,33 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PhotoGallery, wrapIndex } from './photos';
-import type { Photo } from './photo-types';
 
-const variant = (name: string) => ({
-  src: `static/photos/${name}.jpg`,
-  width: 320,
-  height: 240,
-});
-
-const photo = (id: string, alt: string): Photo => ({
-  id,
-  file: `${id}.jpg`,
-  order: 1,
-  alt,
-  caption: alt,
-  orientation: 'landscape',
-  width: 320,
-  height: 240,
-  aspectRatio: 1.3333,
-  sources: [
-    {
-      type: 'image/avif',
-      variants: [variant(`${id}.avif`)],
-      srcset: `static/photos/${id}.avif 320w`,
-    },
-    {
-      type: 'image/webp',
-      variants: [variant(`${id}.webp`)],
-      srcset: `static/photos/${id}.webp 320w`,
-    },
-    {
-      type: 'image/jpeg',
-      variants: [variant(`${id}.jpg`)],
-      srcset: `static/photos/${id}.jpg 320w`,
-    },
-  ],
-  fallback: variant(`${id}.jpg`),
-});
+const thumbnail = (id: string, order: number, alt: string): string => `
+  <a
+    class="thumbnail"
+    href="static/photos/${id}-2400.jpg"
+    data-photo-id="${id}"
+    data-order="${order}"
+    data-caption="${alt}"
+    data-frame-src="static/photos/${id}-2400.jpg"
+    data-frame-sizes="100vw"
+  >
+    <picture>
+      <source type="image/avif" srcset="static/photos/${id}-480.avif 480w" sizes="8vmin" />
+      <source type="image/webp" srcset="static/photos/${id}-480.webp 480w" sizes="8vmin" />
+      <img
+        src="static/photos/${id}-480.jpg"
+        srcset="static/photos/${id}-480.jpg 480w"
+        sizes="8vmin"
+        width="320"
+        height="240"
+        alt="${alt}"
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  </a>`;
 
 const setup = () => {
-  vi.stubGlobal('CSS', {
-    escape: (value: string) => value,
-  });
   vi.stubGlobal('matchMedia', () => ({
     matches: false,
     media: '(prefers-reduced-motion: reduce)',
@@ -56,27 +42,22 @@ const setup = () => {
 
   document.body.innerHTML = `
     <main id="gallery">
-      <a href="static/photos/one.jpg" data-photo-id="one">One</a>
-      <a href="static/photos/two.jpg" data-photo-id="two">Two</a>
+      ${thumbnail('one', 1, 'First photo')}
+      ${thumbnail('two', 2, 'Second photo')}
     </main>
-    <section id="frame"></section>
+    <section class="frame"><div id="frame-content"></div></section>
     <button id="toggle" type="button">Play</button>
   `;
 
   const gallery = document.querySelector<HTMLElement>('#gallery');
-  const frame = document.querySelector<HTMLElement>('#frame');
+  const frame = document.querySelector<HTMLElement>('#frame-content');
   const toggle = document.querySelector<HTMLButtonElement>('#toggle');
 
   if (!gallery || !frame || !toggle) {
     throw new Error('Test DOM failed to initialize.');
   }
 
-  return {
-    gallery,
-    frame,
-    toggle,
-    photos: [photo('one', 'First photo'), photo('two', 'Second photo')],
-  };
+  return { gallery, frame, toggle };
 };
 
 describe('wrapIndex', () => {
@@ -94,9 +75,9 @@ describe('wrapIndex', () => {
 });
 
 describe('PhotoGallery', () => {
-  it('updates the frame and selected state when a thumbnail is clicked', () => {
-    const { gallery, frame, toggle, photos } = setup();
-    new PhotoGallery({ photos, gallery, frame, toggle, autoAdvance: false });
+  it('builds the frame from the clicked thumbnail and marks it current', () => {
+    const { gallery, frame, toggle } = setup();
+    new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
 
     gallery
       .querySelector<HTMLAnchorElement>('[data-photo-id="two"]')
@@ -104,7 +85,11 @@ describe('PhotoGallery', () => {
         new MouseEvent('click', { bubbles: true, cancelable: true })
       );
 
-    expect(frame.querySelector('img')?.alt).toBe('Second photo');
+    const image = frame.querySelector('img');
+    expect(image?.alt).toBe('Second photo');
+    expect(image?.id).toBe('frame-image');
+    expect(image?.getAttribute('src')).toBe('static/photos/two-2400.jpg');
+    expect(frame.querySelector('figcaption')?.textContent).toBe('Second photo');
     expect(
       gallery
         .querySelector('[data-photo-id="two"]')
@@ -112,9 +97,9 @@ describe('PhotoGallery', () => {
     ).toBe('true');
   });
 
-  it('uses scoped arrow-key navigation', () => {
-    const { gallery, frame, toggle, photos } = setup();
-    new PhotoGallery({ photos, gallery, frame, toggle, autoAdvance: false });
+  it('wraps with arrow-key navigation', () => {
+    const { gallery, frame, toggle } = setup();
+    new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
 
     gallery.dispatchEvent(
       new KeyboardEvent('keydown', {

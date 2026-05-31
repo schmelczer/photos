@@ -15,7 +15,7 @@ const formats = [
   {
     type: 'image/avif',
     extension: 'avif',
-    options: { quality: 45, effort: 0 },
+    options: { quality: 45, effort: 4 },
   },
   { type: 'image/webp', extension: 'webp', options: { quality: 78 } },
   {
@@ -55,6 +55,19 @@ const uniqueWidthsFor = (sourceWidth) => {
 const renderSource = ({ type, srcset }, sizes) =>
   `<source type="${type}" srcset="${escapeHtml(srcset)}" sizes="${escapeHtml(sizes)}">`;
 
+// The frame is bounded by BOTH the available width and the viewport height
+// (CSS max-block-size). For a portrait, the height cap is what limits the
+// rendered width, so the displayed width is min(widthCap, heightCap * aspect).
+// Expressing that here stops tall photos from over-fetching a too-wide variant.
+const frameSizes = (photo) => {
+  const aspect = photo.aspectRatio;
+
+  return (
+    `(max-width: 899px) min(calc(100vw - 2rem), calc((100vh - 12rem) * ${aspect})), ` +
+    `min(calc(100vw - 18rem), calc((100vh - 5rem) * ${aspect}))`
+  );
+};
+
 const renderPicture = (
   photo,
   sizes,
@@ -80,7 +93,17 @@ const renderThumbnail = (photo, isCurrent) => {
     (source) => source.type === 'image/jpeg'
   ).variants[0];
 
-  return `<a class="thumbnail thumbnail--${photo.orientation}" href="${photo.fallback.src}" data-photo-id="${photo.id}"${isCurrent ? ' aria-current="true"' : ''}>
+  // The frame is built at runtime by cloning this thumbnail's <picture>, so the
+  // data the frame needs but the thumbnail markup lacks is carried on data-*.
+  const dataAttributes = [
+    `data-photo-id="${photo.id}"`,
+    `data-order="${photo.order}"`,
+    `data-caption="${escapeHtml(photo.caption)}"`,
+    `data-frame-src="${photo.fallback.src}"`,
+    `data-frame-sizes="${escapeHtml(frameSizes(photo))}"`,
+  ].join(' ');
+
+  return `<a class="thumbnail thumbnail--${photo.orientation}" href="${photo.fallback.src}" ${dataAttributes}${isCurrent ? ' aria-current="true"' : ''}>
     ${renderPicture(photo, sizes, 'loading="lazy" decoding="async"', smallestJpeg.src)}
   </a>`;
 };
@@ -88,17 +111,37 @@ const renderThumbnail = (photo, isCurrent) => {
 const renderFrame = (photo) => `<figure class="frame-figure">
     ${renderPicture(
       photo,
-      '(max-width: 899px) calc(100vw - 2rem), calc(100vw - 18rem)',
+      frameSizes(photo),
       'id="frame-image" decoding="async" fetchpriority="high"'
     )}
     <figcaption id="frame-caption">${escapeHtml(photo.caption)}</figcaption>
   </figure>`;
 
+const validateCatalog = (catalog) => {
+  if (!Array.isArray(catalog)) {
+    throw new Error('Photo catalog must be an array.');
+  }
+
+  const seen = new Set();
+
+  for (const [index, entry] of catalog.entries()) {
+    if (!entry || typeof entry.file !== 'string' || entry.file.trim() === '') {
+      throw new Error(
+        `Photo catalog entry ${index + 1} needs a non-empty "file".`
+      );
+    }
+
+    if (seen.has(entry.file)) {
+      throw new Error(`Duplicate photo catalog entry: ${entry.file}`);
+    }
+
+    seen.add(entry.file);
+  }
+};
+
 const assertCatalogMatchesFiles = async (catalog) => {
   const sourceFiles = new Set(
-    (await readdir(sourceDir)).filter((file) =>
-      file.toLowerCase().endsWith('.jpg')
-    )
+    (await readdir(sourceDir)).filter((file) => /\.jpe?g$/i.test(file))
   );
   const catalogFiles = new Set(catalog.map((entry) => entry.file));
 
@@ -116,13 +159,14 @@ const assertCatalogMatchesFiles = async (catalog) => {
 };
 
 const generate = async () => {
-  const catalog = JSON.parse(await readFile(catalogPath, 'utf8')).map(
-    (entry, index) => ({
-      ...entry,
-      id: slugify(entry.file),
-      order: index + 1,
-    })
-  );
+  const rawCatalog = JSON.parse(await readFile(catalogPath, 'utf8'));
+  validateCatalog(rawCatalog);
+
+  const catalog = rawCatalog.map((entry, index) => ({
+    ...entry,
+    id: slugify(entry.file),
+    order: index + 1,
+  }));
 
   await assertCatalogMatchesFiles(catalog);
   await rm(publicPhotoDir, { recursive: true, force: true });
@@ -205,11 +249,6 @@ const generate = async () => {
     });
   }
 
-  const module = `import type { Photo } from '../photo-types';
-
-export const photos = ${JSON.stringify(photos, null, 2)} as const satisfies readonly Photo[];
-`;
-
   const firstPhoto = photos[0];
   const portraits = photos
     .filter((photo) => photo.orientation === 'portrait')
@@ -230,7 +269,6 @@ ${landscapes}
 <!-- /landscapes -->
 `;
 
-  await writeFile(path.join(generatedDir, 'photos.ts'), module);
   await writeFile(path.join(generatedDir, 'gallery.html'), galleryHtml);
   console.log(
     `Generated ${photos.length} photos and ${photos.reduce(

@@ -1,11 +1,6 @@
-import type { ImageSource, Photo } from './photo-types';
-
 const AUTO_ADVANCE_DELAY_MS = 7000;
-const FRAME_SIZES =
-  '(max-width: 899px) calc(100vw - 2rem), calc(100vw - 18rem)';
 
 type GalleryOptions = {
-  readonly photos: readonly Photo[];
   readonly gallery: HTMLElement;
   readonly frame: HTMLElement;
   readonly toggle: HTMLButtonElement;
@@ -38,44 +33,44 @@ export const wrapIndex = (value: number, count: number): number => {
   return ((value % count) + count) % count;
 };
 
-const createSource = (source: ImageSource): HTMLSourceElement => {
-  const element = document.createElement('source');
-  element.type = source.type;
-  element.srcset = source.srcset;
-  element.sizes = FRAME_SIZES;
-
-  return element;
-};
-
-const createFrameFigure = (photo: Photo): HTMLElement => {
+// Build the frame figure by cloning the thumbnail's own <picture>. The variant
+// files are identical to the frame's, so the only differences are the larger
+// fallback src, the frame-appropriate `sizes`, and the caption — all carried on
+// the thumbnail's data-* attributes by the asset generator.
+const createFrameFigure = (thumbnail: HTMLAnchorElement): HTMLElement => {
   const figure = document.createElement('figure');
   figure.className = 'frame-figure';
 
-  const picture = document.createElement('picture');
-
-  for (const source of photo.sources.filter(
-    ({ type }) => type !== 'image/jpeg'
-  )) {
-    picture.append(createSource(source));
+  const original = thumbnail.querySelector('picture');
+  if (!original) {
+    throw new Error(
+      `Thumbnail is missing a picture: ${thumbnail.dataset.photoId}`
+    );
   }
 
-  const jpeg = photo.sources.find(({ type }) => type === 'image/jpeg');
-  const image = document.createElement('img');
-  image.id = 'frame-image';
-  image.src = photo.fallback.src;
-  image.srcset = jpeg?.srcset ?? '';
-  image.sizes = FRAME_SIZES;
-  image.width = photo.width;
-  image.height = photo.height;
-  image.alt = photo.alt;
-  image.decoding = 'async';
-  image.fetchPriority = 'high';
+  const picture = original.cloneNode(true) as HTMLElement;
+  const image = picture.querySelector('img');
+  if (!image) {
+    throw new Error(
+      `Thumbnail is missing an image: ${thumbnail.dataset.photoId}`
+    );
+  }
 
-  picture.append(image);
+  const sizes = thumbnail.dataset.frameSizes ?? '';
+  for (const element of picture.querySelectorAll('source, img')) {
+    element.setAttribute('sizes', sizes);
+  }
+
+  image.id = 'frame-image';
+  if (thumbnail.dataset.frameSrc) {
+    image.src = thumbnail.dataset.frameSrc;
+  }
+  image.removeAttribute('loading');
+  image.decoding = 'async';
 
   const caption = document.createElement('figcaption');
   caption.id = 'frame-caption';
-  caption.textContent = photo.caption;
+  caption.textContent = thumbnail.dataset.caption ?? '';
 
   figure.append(picture, caption);
 
@@ -91,15 +86,19 @@ export class PhotoGallery {
   );
 
   public constructor(private readonly options: GalleryOptions) {
-    if (options.photos.length === 0) {
+    this.thumbnails = Array.from(
+      options.gallery.querySelectorAll<HTMLAnchorElement>('[data-photo-id]')
+    ).sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order));
+
+    if (this.thumbnails.length === 0) {
       throw new Error('The gallery needs at least one photo.');
     }
 
-    this.thumbnails = this.options.photos.map((photo) =>
-      this.thumbnailFor(photo)
-    );
     this.addEventListeners();
-    this.select(0);
+
+    // The frame for photo 0 is already server-rendered, so just mark the
+    // selected thumbnail; rebuilding it would discard the in-flight LCP image.
+    this.updateSelectedThumbnail(0, false);
 
     if (this.options.autoAdvance !== false && !this.reducedMotion.matches) {
       this.startAutoAdvance();
@@ -123,10 +122,6 @@ export class PhotoGallery {
     });
 
     this.options.gallery.addEventListener('keydown', (event) => {
-      if (!this.options.gallery.contains(event.target as Node)) {
-        return;
-      }
-
       switch (event.key) {
         case 'ArrowLeft':
           event.preventDefault();
@@ -148,7 +143,7 @@ export class PhotoGallery {
           break;
         case 'End':
           event.preventDefault();
-          this.select(this.options.photos.length - 1, {
+          this.select(this.thumbnails.length - 1, {
             focusThumbnail: true,
             pause: true,
           });
@@ -161,11 +156,6 @@ export class PhotoGallery {
     );
     this.options.gallery.addEventListener(
       'wheel',
-      () => this.pauseAutoAdvance(),
-      { passive: true }
-    );
-    this.options.gallery.addEventListener(
-      'touchstart',
       () => this.pauseAutoAdvance(),
       { passive: true }
     );
@@ -185,20 +175,10 @@ export class PhotoGallery {
     });
   }
 
-  private thumbnailFor(photo: Photo): HTMLAnchorElement {
-    const thumbnail = this.options.gallery.querySelector<HTMLAnchorElement>(
-      `[data-photo-id="${CSS.escape(photo.id)}"]`
-    );
-
-    if (!thumbnail) {
-      throw new Error(`Missing thumbnail for ${photo.id}.`);
-    }
-
-    return thumbnail;
-  }
-
   private selectById(id: string | undefined, options: SelectOptions): void {
-    const index = this.options.photos.findIndex((photo) => photo.id === id);
+    const index = this.thumbnails.findIndex(
+      (thumbnail) => thumbnail.dataset.photoId === id
+    );
 
     if (index >= 0) {
       this.select(index, options);
@@ -206,24 +186,27 @@ export class PhotoGallery {
   }
 
   private select(value: number, options: SelectOptions = {}): void {
-    this.selectedIndex = wrapIndex(value, this.options.photos.length);
-    const photo = this.options.photos[this.selectedIndex];
+    this.selectedIndex = wrapIndex(value, this.thumbnails.length);
+    const thumbnail = this.thumbnails[this.selectedIndex];
 
-    if (!photo) {
+    if (!thumbnail) {
       throw new Error('Selected photo is missing.');
     }
 
-    this.options.frame.replaceChildren(createFrameFigure(photo));
-    this.updateSelectedThumbnail(photo, options.focusThumbnail ?? false);
+    this.options.frame.replaceChildren(createFrameFigure(thumbnail));
+    this.updateSelectedThumbnail(
+      this.selectedIndex,
+      options.focusThumbnail ?? false
+    );
 
     if (options.pause) {
       this.pauseAutoAdvance();
     }
   }
 
-  private updateSelectedThumbnail(photo: Photo, shouldFocus: boolean): void {
-    for (const thumbnail of this.thumbnails) {
-      const selected = thumbnail.dataset.photoId === photo.id;
+  private updateSelectedThumbnail(index: number, shouldFocus: boolean): void {
+    this.thumbnails.forEach((thumbnail, i) => {
+      const selected = i === index;
       if (selected) {
         thumbnail.setAttribute('aria-current', 'true');
       } else {
@@ -238,7 +221,7 @@ export class PhotoGallery {
           inline: 'nearest',
         });
       }
-    }
+    });
   }
 
   private startAutoAdvance(): void {
