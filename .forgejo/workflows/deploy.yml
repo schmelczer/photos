@@ -31,9 +31,8 @@ jobs:
         run: |
           npm run build
 
-      - name: Copy build to host pages mount
+      - name: Copy files to nginx pages mount
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           apt update && apt install -y rsync
-          mkdir -p /pages/photos
-          rsync -a --delete dist/ /pages/photos/
+          rsync -a --delete --mkpath --chmod=ugo=rwx dist/ /pages/photos/
