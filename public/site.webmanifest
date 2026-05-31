@@ -1,0 +1,15 @@
+{
+  "name": "Photos - András Schmelczer",
+  "short_name": "Photos",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#eeeeee",
+  "theme_color": "#a63446",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}

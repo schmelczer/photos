@@ -7,12 +7,15 @@ on:
     branches: ['main']
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: 'pages'
-  cancel-in-progress: false
+  group: 'photos-${{ github.ref }}'
+  cancel-in-progress: true
 
 jobs:
-  build:
+  validate:
     runs-on: docker
 
     steps:
@@ -21,18 +24,46 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '12'
+          node-version-file: '.nvmrc'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm ci
+
+      - name: Check
+        run: npm run check
 
       - name: Build
-        run: |
-          npm run build
+        run: npm run build
 
-      - name: Copy files to nginx pages mount
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end smoke test
+        run: npm run test:e2e
+
+  deploy:
+    runs-on: docker
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy build to host pages mount
         run: |
           apt update && apt install -y rsync
-          rsync -a --delete --mkpath --chmod=ugo=rwx dist/ /pages/photos/
+          mkdir -p /pages/photos
+          rsync -a --delete dist/ /pages/photos/

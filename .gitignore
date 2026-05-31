@@ -1,5 +1,8 @@
 node_modules
 dist
 target
-package-lock.json
 .DS_Store
+public/static/photos
+src/generated
+playwright-report
+test-results

@@ -1,35 +1,19 @@
 import './index.scss';
-import './no-change/404.html';
-import './no-change/robots.txt';
-import { Photos } from './photos';
+import { photos } from './generated/photos';
+import { PhotoGallery, requiredElement } from './photos';
 
-// @ts-ignore
-const images = require.context('./pictures', true, /.jpg$/);
-const imagePath = name => images(name, true);
+document.documentElement.classList.add('js');
 
-const addSupportForTabNavigation = () =>
-  (document.onkeydown = e => {
-    if (e.key === ' ') {
-      (document.activeElement as HTMLElement)?.click();
-      e.preventDefault();
-    }
-  });
-
-const sizeFrame = () => {
-  const container = document.querySelector('#frame-container') as HTMLElement;
-  const image = container.querySelector('img');
-
-  image.style.maxWidth = container.clientWidth + 'px';
-  image.style.left = container.offsetLeft + container.clientWidth / 2 + 'px';
-};
-
-new Photos(
-  images.keys().map(k => imagePath(k)),
-  document.querySelector('#landscapes'),
-  document.querySelector('#portraits'),
-  document.querySelector('#frame-image')
+const gallery = requiredElement<HTMLElement>('#gallery', HTMLElement);
+const frame = requiredElement<HTMLElement>('#frame-content', HTMLElement);
+const toggle = requiredElement<HTMLButtonElement>(
+  '#slideshow-toggle',
+  HTMLButtonElement
 );
 
-addSupportForTabNavigation();
-window.addEventListener('resize', sizeFrame);
-sizeFrame();
+new PhotoGallery({
+  photos,
+  gallery,
+  frame,
+  toggle,
+});
