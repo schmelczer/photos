@@ -169,9 +169,16 @@ const generate = async () => {
   }));
 
   await assertCatalogMatchesFiles(catalog);
-  await rm(publicPhotoDir, { recursive: true, force: true });
   await mkdir(publicPhotoDir, { recursive: true });
   await mkdir(generatedDir, { recursive: true });
+
+  // Variant filenames embed a hash of their source image, so any file that
+  // already exists is already up to date. Skip re-encoding those and prune
+  // only the ones no longer referenced. Regenerating every variant from
+  // scratch takes minutes and would blow the Playwright preview server's
+  // startup timeout.
+  const existingFiles = new Set(await readdir(publicPhotoDir));
+  const expectedFiles = new Set();
 
   const photos = [];
 
@@ -192,8 +199,10 @@ const generate = async () => {
       const variants = outputWidths.map((width) => {
         const height = Math.round((width / metadata.width) * metadata.height);
         const filename = `${entry.id}-${hash}-${width}.${format.extension}`;
+        expectedFiles.add(filename);
 
         return {
+          filename,
           outputPath: path.join(publicPhotoDir, filename),
           src: `static/photos/${filename}`,
           width,
@@ -202,20 +211,22 @@ const generate = async () => {
       });
 
       await Promise.all(
-        variants.map(async ({ outputPath, width }) => {
-          const pipeline = sharp(input).rotate().resize({
-            width,
-            withoutEnlargement: true,
-          });
+        variants
+          .filter(({ filename }) => !existingFiles.has(filename))
+          .map(async ({ outputPath, width }) => {
+            const pipeline = sharp(input).rotate().resize({
+              width,
+              withoutEnlargement: true,
+            });
 
-          if (format.extension === 'avif') {
-            await pipeline.avif(format.options).toFile(outputPath);
-          } else if (format.extension === 'webp') {
-            await pipeline.webp(format.options).toFile(outputPath);
-          } else {
-            await pipeline.jpeg(format.options).toFile(outputPath);
-          }
-        })
+            if (format.extension === 'avif') {
+              await pipeline.avif(format.options).toFile(outputPath);
+            } else if (format.extension === 'webp') {
+              await pipeline.webp(format.options).toFile(outputPath);
+            } else {
+              await pipeline.jpeg(format.options).toFile(outputPath);
+            }
+          })
       );
 
       sources.push({
@@ -248,6 +259,16 @@ const generate = async () => {
       fallback,
     });
   }
+
+  // Drop variants that are no longer referenced: deleted photos, or sources
+  // whose content changed (and so produced a new hash in their filename).
+  await Promise.all(
+    [...existingFiles]
+      .filter((filename) => !expectedFiles.has(filename))
+      .map((filename) =>
+        rm(path.join(publicPhotoDir, filename), { force: true })
+      )
+  );
 
   const firstPhoto = photos[0];
   const portraits = photos
