@@ -1,61 +1,55 @@
 {
-  "name": "portfolio",
+  "name": "photos",
   "version": "1.0.0",
-  "description": "An easily configurable portfolio.",
+  "description": "A static, progressively enhanced photo portfolio.",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "webpack-dev-server --mode development",
-    "build": "webpack && find dist -type f -regex \".*\\(js\\|css\\|LICENSE.*\\)\" | xargs rm"
+    "dev": "node scripts/generate-assets.mjs && vite --host 0.0.0.0",
+    "lint": "eslint . --fix && stylelint \"src/**/*.scss\" --fix && prettier --write .",
+    "lint:check": "node scripts/check-photo-catalog.mjs && node scripts/generate-assets.mjs && node scripts/check-image-metadata.mjs && tsc --noEmit && eslint . && stylelint \"src/**/*.scss\" && prettier --check .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "build": "node scripts/generate-assets.mjs && vite build"
+  },
+  "engines": {
+    "node": ">=22.13.0",
+    "npm": ">=10.9.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/schmelczerandras/timeline.git"
+    "url": "git+https://github.com/schmelczerandras/photos.git"
   },
   "keywords": [
-    "CV",
     "portfolio",
-    "resume",
-    "resumé"
+    "photography",
+    "photos",
+    "gallery"
   ],
   "author": "András Schmelczer",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/schmelczerandras/timeline/issues"
+    "url": "https://github.com/schmelczerandras/photos/issues"
   },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
+  "homepage": "https://schmelczer.dev/photos/",
   "browserslist": [
     "defaults"
   ],
-  "homepage": "https://github.com/schmelczerandras/timeline#readme",
   "devDependencies": {
-    "autoprefixer": "^9.8.6",
-    "clean-webpack-plugin": "^3.0.0",
-    "css-loader": "^3.6.0",
-    "cssnano": "latest",
-    "file-loader": "^5.1.0",
-    "html-webpack-inline-source-plugin": "0.0.10",
-    "html-webpack-plugin": "^3.2.0",
-    "image-webpack-loader": "^6.0.0",
-    "mini-css-extract-plugin": "^0.9.0",
-    "optimize-css-assets-webpack-plugin": "^5.0.4",
-    "postcss-loader": "^3.0.0",
-    "prettier": "^1.19.1",
-    "resolve-url-loader": "^3.1.1",
-    "responsive-loader": "^1.2.0",
-    "sass": "^1.26.11",
-    "sass-loader": "^8.0.2",
-    "sharp": "^0.23.4",
-    "style-loader": "^1.2.1",
-    "svg-url-loader": "^3.0.3",
-    "terser-webpack-plugin": "^2.3.8",
-    "ts-loader": "^6.2.2",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1",
+    "eslint": "^10.4.1",
+    "globals": "^16.5.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.3",
+    "sass": "^1.95.0",
+    "sharp": "^0.34.5",
+    "stylelint": "^17.12.0",
+    "stylelint-config-standard-scss": "^17.0.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.0",
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7"
   }
 }

@@ -33,9 +33,11 @@ html {
 
 body {
   min-height: 100dvh;
+  block-size: 100dvh;
   margin: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
+  overflow: hidden;
 }
 
 img {
@@ -56,6 +58,8 @@ img {
 .site-header {
   display: grid;
   place-items: center;
+  position: relative;
+  min-inline-size: 5rem;
   background: var(--color-accent);
   color: var(--color-text);
   padding: var(--space-m) var(--space-s);
@@ -135,7 +139,6 @@ img {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
   padding: var(--space-m);
 }
 
@@ -180,14 +183,18 @@ img {
 
 .slideshow-toggle {
   display: none;
-  justify-self: end;
-  margin-block-start: var(--space-s);
+  position: absolute;
+  inset-block-start: var(--space-s);
+  inset-inline-start: var(--space-s);
+  justify-self: start;
   border: 0;
   border-radius: 4px;
   padding: 0.45rem 0.75rem;
-  background: var(--color-accent);
+  background: var(--color-accent-strong);
   color: var(--color-text);
   font: inherit;
+  font-size: 0.875rem;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -196,7 +203,7 @@ img {
 }
 
 .slideshow-toggle:hover {
-  background: var(--color-accent-strong);
+  background: #5f1724;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -216,13 +223,20 @@ img {
   }
 
   .site-header {
-    padding: var(--space-s) var(--space-m);
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-s);
+    padding: var(--space-s);
+  }
+
+  .slideshow-toggle {
+    position: static;
   }
 
   .site-header h1 {
+    justify-self: center;
     writing-mode: horizontal-tb;
     transform: none;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 7vw, 2rem);
   }
 
   .gallery {
