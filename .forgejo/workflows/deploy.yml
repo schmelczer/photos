@@ -30,8 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check
-        run: npm run check
+      - name: Lint and static checks
+        run: npm run lint:check
+
+      - name: Unit tests
+        run: npm test
 
       - name: Build
         run: npm run build
@@ -65,5 +68,4 @@ jobs:
       - name: Copy build to host pages mount
         run: |
           apt update && apt install -y rsync
-          mkdir -p /pages/photos
-          rsync -a --delete dist/ /pages/photos/
+          rsync -a --delete --mkpath --chmod=ugo=rwx dist/ /pages/photos/

@@ -1,24 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>Photos - András Schmelczer</title>
-		<meta name="description" content="A very simple page where I showcase some of my photos. Although I am not a professional photographer, I truly love capturing joyous moments.">
-		<meta name="theme-color" content="#A63446">
-		<meta name="viewport" content="initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Photos - András Schmelczer</title>
+    <meta
+      name="description"
+      content="A small photo portfolio by András Schmelczer, with portraits, landscapes, city scenes, and quiet details."
+    />
+    <meta name="theme-color" content="#a63446" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="canonical" href="__SITE_URL__" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
 
-		<link href="https://fonts.googleapis.com/css?family=Roboto:100" rel="stylesheet">
-	</head>
-	<body>
-		<header>
-			<h1>András Schmelczer</h1>
-		</header>
-		<main id="images">
-			<section id="portraits" class="cluster"></section>
-			<div id="frame-container">
-				<img src="" alt="opened photo" id="frame-image"/>
-			</div>
-			<section id="landscapes" class="cluster"></section>
-		</main>
-	</body>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="__SITE_URL__" />
+    <meta property="og:title" content="Photos - András Schmelczer" />
+    <meta
+      property="og:description"
+      content="Portraits, landscapes, city scenes, and quiet details photographed by András Schmelczer."
+    />
+    <meta property="og:image" content="__OG_IMAGE_URL__" />
+    <meta property="og:image:alt" content="Photo portfolio preview" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Photos - András Schmelczer" />
+    <meta
+      name="twitter:description"
+      content="Portraits, landscapes, city scenes, and quiet details photographed by András Schmelczer."
+    />
+    <meta name="twitter:image" content="__OG_IMAGE_URL__" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>András Schmelczer</h1>
+    </header>
+
+    <main id="gallery" class="gallery" aria-label="Photo gallery">
+      <section
+        id="portraits"
+        class="rail rail--portraits"
+        aria-label="Portrait photos"
+      >
+        <!-- gallery:portraits -->
+      </section>
+
+      <section class="frame" aria-live="polite">
+        <div id="frame-content" class="frame-content">
+          <!-- gallery:frame -->
+        </div>
+        <button
+          id="slideshow-toggle"
+          class="slideshow-toggle"
+          type="button"
+          aria-pressed="false"
+        >
+          Play
+        </button>
+      </section>
+
+      <section
+        id="landscapes"
+        class="rail rail--landscapes"
+        aria-label="Landscape photos"
+      >
+        <!-- gallery:landscapes -->
+      </section>
+    </main>
+
+    <script type="module" src="/index.ts"></script>
+  </body>
 </html>

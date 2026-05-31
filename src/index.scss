@@ -1,239 +1,273 @@
-@mixin center-children() {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+$breakpoint: 900px;
 
-@mixin portrait() {
-  @media (max-width: 900px) {
-    @content;
-  }
+:root {
+  --color-text: #fff;
+  --color-ink: #202124;
+  --color-accent: #a63446;
+  --color-accent-strong: #7c2130;
+  --color-background: #eee;
+  --color-focus: #ffd166;
+  --border-width: 5px;
+  --space-xs: 0.375rem;
+  --space-s: 0.75rem;
+  --space-m: 1.5rem;
 }
-
-@mixin landscape() {
-  @media (min-width: 900px) {
-    @content;
-  }
-}
-
-$text-color: #ffffff;
-$accent-color: #a63446;
-$background-color: #eeeeee;
-$border-width: 5px;
-$normal-margin: 24px;
-$small-margin: 6px;
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:focus {
-  outline: $accent-color solid $border-width * 1.1;
-  outline-offset: -$border-width * 1.1;
-}
-
-img {
-  border: $border-width solid $text-color;
-  box-sizing: content-box;
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 html {
-  height: 100%;
-  overflow-x: hidden;
-  background-color: $background-color;
+  min-height: 100%;
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
 
+body {
+  min-height: 100dvh;
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.site-header {
+  display: grid;
+  place-items: center;
+  background: var(--color-accent);
+  color: var(--color-text);
+  padding: var(--space-m) var(--space-s);
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vmin, 3rem);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 1;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+.gallery {
+  min-width: 0;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(
+      7rem,
+      14vmin
+    );
+  position: relative;
+}
+
+.rail {
+  min-height: 0;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-m) var(--space-s);
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+.thumbnail {
+  display: block;
+  flex: 0 0 auto;
+  border: var(--border-width) solid var(--color-text);
+  background: var(--color-text);
+  color: inherit;
+  box-shadow: 0 0 0 1px rgb(32 33 36 / 16%);
+}
+
+.thumbnail:hover,
+.thumbnail.is-selected {
+  border-color: var(--color-accent);
+}
+
+.thumbnail:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 6px var(--color-accent-strong),
+    0 0 0 1px rgb(32 33 36 / 16%);
+}
+
+.thumbnail--portrait {
+  inline-size: 8vmin;
+}
+
+.thumbnail--landscape {
+  inline-size: 12vmin;
+}
+
+.thumbnail picture,
+.thumbnail img {
+  inline-size: 100%;
+}
+
+.frame {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: var(--space-m);
+}
+
+.frame-content {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.frame-figure {
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-s);
+}
+
+.frame-figure picture {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.frame-figure img {
+  inline-size: auto;
+  max-inline-size: 100%;
+  max-block-size: calc(100dvh - 5rem);
+  border: var(--border-width) solid var(--color-text);
+  background: var(--color-text);
+  object-fit: contain;
+  box-shadow: 0 0 0 1px rgb(32 33 36 / 16%);
+}
+
+.frame-figure figcaption {
+  max-inline-size: min(42rem, 100%);
+  color: var(--color-ink);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.slideshow-toggle {
+  display: none;
+  justify-self: end;
+  margin-block-start: var(--space-s);
+  border: 0;
+  border-radius: 4px;
+  padding: 0.45rem 0.75rem;
+  background: var(--color-accent);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.js .slideshow-toggle {
+  display: block;
+}
+
+.slideshow-toggle:hover {
+  background: var(--color-accent-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (width < $breakpoint) {
   body {
-    display: flex;
-    overflow: hidden;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
 
-    @include portrait {
-      height: 100%;
-      flex-direction: column;
-    }
+  .site-header {
+    padding: var(--space-s) var(--space-m);
+  }
 
-    @include landscape {
-      &::-webkit-scrollbar-track,
-      &::-webkit-scrollbar {
-        background-color: transparent;
-        width: 12px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background-color: $accent-color;
-        border-radius: 1000px;
-      }
-    }
-    h1,
-    header {
-      font-family: 'Roboto', serif;
-      font-weight: 100;
+  .site-header h1 {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 2rem;
+  }
 
-      @include landscape {
-        font-size: 3rem;
-      }
+  .gallery {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
 
-      @include portrait {
-        font-size: 2rem;
-      }
-    }
+  .rail {
+    max-height: none;
+    min-width: 0;
+    overflow: auto hidden;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: var(--space-xs) var(--space-s);
+  }
 
-    header {
-      @include center-children;
-      box-sizing: content-box;
-      height: 100%;
-      position: relative;
+  .rail--portraits {
+    grid-row: 1;
+  }
 
-      @include portrait {
-        width: 100%;
-        height: 2.15ch;
-        padding: $normal-margin 0;
-      }
+  .rail--landscapes {
+    grid-row: 3;
+  }
 
-      @include landscape {
-        width: 2.15ch;
-        height: 100vh;
-        padding: 0 $normal-margin;
-      }
+  .thumbnail {
+    inline-size: auto;
+  }
 
-      h1 {
-        color: $text-color;
-        background-color: $accent-color;
-        padding: $normal-margin 0;
+  .thumbnail--portrait img {
+    block-size: 12vmin;
+    inline-size: auto;
+  }
 
-        white-space: nowrap;
-        user-select: none;
-        z-index: 2;
-        position: fixed;
+  .thumbnail--landscape img {
+    block-size: 8vmin;
+    inline-size: auto;
+  }
 
-        text-align: center;
+  .frame {
+    grid-row: 2;
+    padding: var(--space-s);
+  }
 
-        @include portrait {
-          width: 100%;
-        }
-
-        @include landscape {
-          width: 101vh;
-          transform: rotate(-90deg);
-        }
-      }
-    }
-
-    main#images {
-      flex: 1;
-      display: flex;
-      justify-content: space-between;
-
-      @include portrait {
-        flex-direction: column;
-      }
-
-      .cluster {
-        display: flex;
-        justify-content: space-between;
-
-        img {
-          cursor: pointer;
-        }
-
-        &#portraits > img {
-          @include portrait {
-            height: 12vmin;
-            width: auto;
-          }
-          @include landscape {
-            width: 8vmin;
-          }
-        }
-
-        &#landscapes > img {
-          @include portrait {
-            height: 8vmin;
-            width: auto;
-          }
-          @include landscape {
-            width: 12vmin;
-          }
-        }
-
-        img {
-          @include portrait {
-            margin: 0 $small-margin;
-          }
-        }
-
-        @include portrait {
-          width: 100%;
-          overflow: auto;
-          margin: $small-margin 0;
-          padding: $small-margin 0;
-          object-fit: contain;
-
-          :first-child {
-            margin-left: 2 * $small-margin;
-          }
-
-          &:last-child {
-            margin-right: 2 * $small-margin !important;
-          }
-        }
-
-        @include landscape {
-          flex-direction: column;
-          margin: $normal-margin;
-
-          img {
-            margin: $small-margin 0;
-          }
-
-          :first-child {
-            margin-top: 0;
-          }
-
-          :last-child {
-            margin-bottom: 0;
-          }
-        }
-      }
-
-      #frame-container {
-        @include center-children;
-        margin: 0 $border-width;
-
-        flex: 1;
-        @include landscape {
-        }
-
-        @include portrait {
-          position: relative;
-        }
-
-        img {
-          height: auto;
-          width: auto;
-
-          top: 50%;
-          transform: translateY(-50%) translateX(-50%);
-
-          @include portrait {
-            position: absolute;
-            box-sizing: border-box;
-            max-width: 100% !important; // undo js
-            max-height: 100%;
-            left: 50% !important; // undo js
-          }
-
-          @include landscape {
-            position: fixed;
-            max-height: 90vh;
-          }
-        }
-      }
-    }
+  .frame-figure img {
+    max-block-size: calc(100dvh - 12rem);
   }
 }
