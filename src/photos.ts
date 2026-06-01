@@ -5,11 +5,13 @@ type GalleryOptions = {
   readonly frame: HTMLElement;
   readonly toggle: HTMLButtonElement;
   readonly autoAdvance?: boolean;
+  readonly onSelect?: (info: { photoId: string; source: string }) => void;
 };
 
 type SelectOptions = {
   readonly focusThumbnail?: boolean;
   readonly pause?: boolean;
+  readonly source?: string;
 };
 
 export const requiredElement = <T extends Element>(
@@ -118,7 +120,10 @@ export class PhotoGallery {
       }
 
       event.preventDefault();
-      this.selectById(thumbnail.dataset.photoId, { pause: true });
+      this.selectById(thumbnail.dataset.photoId, {
+        pause: true,
+        source: 'thumbnail',
+      });
     });
 
     this.options.gallery.addEventListener('keydown', (event) => {
@@ -128,6 +133,7 @@ export class PhotoGallery {
           this.select(this.selectedIndex - 1, {
             focusThumbnail: true,
             pause: true,
+            source: 'keyboard',
           });
           break;
         case 'ArrowRight':
@@ -135,17 +141,23 @@ export class PhotoGallery {
           this.select(this.selectedIndex + 1, {
             focusThumbnail: true,
             pause: true,
+            source: 'keyboard',
           });
           break;
         case 'Home':
           event.preventDefault();
-          this.select(0, { focusThumbnail: true, pause: true });
+          this.select(0, {
+            focusThumbnail: true,
+            pause: true,
+            source: 'keyboard',
+          });
           break;
         case 'End':
           event.preventDefault();
           this.select(this.thumbnails.length - 1, {
             focusThumbnail: true,
             pause: true,
+            source: 'keyboard',
           });
           break;
       }
@@ -201,6 +213,15 @@ export class PhotoGallery {
 
     if (options.pause) {
       this.pauseAutoAdvance();
+    }
+
+    // Only user-initiated selections carry a source; auto-advance stays
+    // untracked so the slideshow doesn't flood analytics every few seconds.
+    if (options.source) {
+      this.options.onSelect?.({
+        photoId: thumbnail.dataset.photoId ?? '',
+        source: options.source,
+      });
     }
   }
 
