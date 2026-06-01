@@ -10,20 +10,29 @@ const sourceDir = path.join(rootDir, 'src/pictures');
 const publicPhotoDir = path.join(rootDir, 'public/static/photos');
 const generatedDir = path.join(rootDir, 'src/generated');
 const catalogPath = path.join(rootDir, 'src/photo-catalog.json');
-const widths = [480, 960, 1600, 2400];
+// The top width (3200) covers HiDPI/large displays: the frame is shown at up
+// to ~2200 CSS px, so a retina viewer needs ~4000+ device px. Sources that are
+// smaller aren't upscaled (withoutEnlargement), so we only pay for it where the
+// resolution actually exists.
+const widths = [480, 960, 1600, 2400, 3200];
 const formats = [
   {
     type: 'image/avif',
     extension: 'avif',
-    options: { quality: 45, effort: 4 },
+    options: { quality: 58, effort: 4 },
   },
-  { type: 'image/webp', extension: 'webp', options: { quality: 78 } },
+  { type: 'image/webp', extension: 'webp', options: { quality: 82 } },
   {
     type: 'image/jpeg',
     extension: 'jpg',
-    options: { quality: 82, mozjpeg: true, progressive: true },
+    options: { quality: 85, mozjpeg: true, progressive: true },
   },
 ];
+
+// Variant filenames are keyed by a hash so unchanged files are skipped. The key
+// must cover the encoding settings too — otherwise a quality/width change keeps
+// serving the stale files because their names never change.
+const encodingKey = JSON.stringify({ widths, formats });
 
 const slugify = (value) =>
   value
@@ -185,7 +194,11 @@ const generate = async () => {
   for (const entry of catalog) {
     const inputPath = path.join(sourceDir, entry.file);
     const input = await readFile(inputPath);
-    const hash = createHash('sha256').update(input).digest('hex').slice(0, 10);
+    const hash = createHash('sha256')
+      .update(input)
+      .update(encodingKey)
+      .digest('hex')
+      .slice(0, 10);
     const metadata = await sharp(input).rotate().metadata();
 
     if (!metadata.width || !metadata.height) {
