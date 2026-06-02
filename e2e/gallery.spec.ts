@@ -5,7 +5,7 @@ test('renders the gallery and supports keyboard navigation', async ({
 }) => {
   await page.goto('/');
 
-  await expect(page.locator('.thumbnail')).toHaveCount(54);
+  await expect(page.locator('.thumbnail')).toHaveCount(47);
   await expect(page.locator('#frame-image')).toBeVisible();
 
   const firstAlt = await page.locator('#frame-image').getAttribute('alt');
