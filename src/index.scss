@@ -152,7 +152,6 @@ img {
   margin: 0;
   display: grid;
   justify-items: center;
-  gap: var(--space-s);
 }
 
 .frame-figure picture {
@@ -169,14 +168,6 @@ img {
   background: var(--color-text);
   object-fit: contain;
   box-shadow: 0 0 0 1px rgb(32 33 36 / 16%);
-}
-
-.frame-figure figcaption {
-  max-inline-size: min(42rem, 100%);
-  color: var(--color-ink);
-  font-size: 0.95rem;
-  line-height: 1.35;
-  text-align: center;
 }
 
 .slideshow-toggle {

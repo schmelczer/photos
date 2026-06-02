@@ -7,7 +7,6 @@ const thumbnail = (id: string, order: number, alt: string): string => `
     href="static/photos/${id}-2400.jpg"
     data-photo-id="${id}"
     data-order="${order}"
-    data-caption="${alt}"
     data-frame-src="static/photos/${id}-2400.jpg"
     data-frame-sizes="100vw"
   >
@@ -89,7 +88,6 @@ describe('PhotoGallery', () => {
     expect(image?.alt).toBe('Second photo');
     expect(image?.id).toBe('frame-image');
     expect(image?.getAttribute('src')).toBe('static/photos/two-2400.jpg');
-    expect(frame.querySelector('figcaption')?.textContent).toBe('Second photo');
     expect(
       gallery
         .querySelector('[data-photo-id="two"]')

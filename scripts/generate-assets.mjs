@@ -107,7 +107,6 @@ const renderThumbnail = (photo, isCurrent) => {
   const dataAttributes = [
     `data-photo-id="${photo.id}"`,
     `data-order="${photo.order}"`,
-    `data-caption="${escapeHtml(photo.caption)}"`,
     `data-frame-src="${photo.fallback.src}"`,
     `data-frame-sizes="${escapeHtml(frameSizes(photo))}"`,
   ].join(' ');
@@ -123,7 +122,6 @@ const renderFrame = (photo) => `<figure class="frame-figure">
       frameSizes(photo),
       'id="frame-image" decoding="async" fetchpriority="high"'
     )}
-    <figcaption id="frame-caption">${escapeHtml(photo.caption)}</figcaption>
   </figure>`;
 
 const validateCatalog = (catalog) => {
@@ -263,7 +261,6 @@ const generate = async () => {
       file: entry.file,
       order: entry.order,
       alt: entry.alt,
-      caption: entry.caption,
       orientation: metadata.width >= metadata.height ? 'landscape' : 'portrait',
       width: metadata.width,
       height: metadata.height,

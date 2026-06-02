@@ -37,8 +37,8 @@ export const wrapIndex = (value: number, count: number): number => {
 
 // Build the frame figure by cloning the thumbnail's own <picture>. The variant
 // files are identical to the frame's, so the only differences are the larger
-// fallback src, the frame-appropriate `sizes`, and the caption — all carried on
-// the thumbnail's data-* attributes by the asset generator.
+// fallback src and the frame-appropriate `sizes` — both carried on the
+// thumbnail's data-* attributes by the asset generator.
 const createFrameFigure = (thumbnail: HTMLAnchorElement): HTMLElement => {
   const figure = document.createElement('figure');
   figure.className = 'frame-figure';
@@ -70,11 +70,7 @@ const createFrameFigure = (thumbnail: HTMLAnchorElement): HTMLElement => {
   image.removeAttribute('loading');
   image.decoding = 'async';
 
-  const caption = document.createElement('figcaption');
-  caption.id = 'frame-caption';
-  caption.textContent = thumbnail.dataset.caption ?? '';
-
-  figure.append(picture, caption);
+  figure.append(picture);
 
   return figure;
 };
