@@ -248,7 +248,9 @@ img {
   }
 
   .slideshow-toggle {
+    inset-block-start: 50%;
     inset-inline: auto var(--space-s);
+    transform: translateY(-50%);
   }
 
   .site-header h1 {
