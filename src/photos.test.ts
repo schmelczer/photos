@@ -109,4 +109,67 @@ describe('PhotoGallery', () => {
 
     expect(frame.querySelector('img')?.alt).toBe('Second photo');
   });
+
+  it('preloads the next photo off-screen without duplicating the frame id', () => {
+    const { gallery, frame, toggle } = setup();
+    new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
+
+    const preload = document.querySelector('.frame-preload img');
+    expect(preload?.getAttribute('src')).toBe('static/photos/two-2400.jpg');
+    // The off-screen copy must not steal the displayed image's id.
+    expect(preload?.id).toBe('');
+    expect(document.querySelectorAll('#frame-image')).toHaveLength(0);
+  });
+
+  it('moves the preload to the next photo as the selection advances', () => {
+    const { gallery, frame, toggle } = setup();
+    new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
+
+    gallery
+      .querySelector<HTMLAnchorElement>('[data-photo-id="two"]')
+      ?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true })
+      );
+
+    // Showing 'two' leaves exactly one framed image and preloads the wrap-around.
+    expect(document.querySelectorAll('#frame-image')).toHaveLength(1);
+    expect(
+      document.querySelector('.frame-preload img')?.getAttribute('src')
+    ).toBe('static/photos/one-2400.jpg');
+  });
+
+  it('sets the aspect ratio so the frame reserves the photo size before it loads', () => {
+    const { gallery, frame, toggle } = setup();
+    new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
+
+    gallery
+      .querySelector<HTMLAnchorElement>('[data-photo-id="one"]')
+      ?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true })
+      );
+
+    // Thumbnail markup is 320x240, so the figure carries that ratio for CSS.
+    const figure = frame.querySelector<HTMLElement>('.frame-figure');
+    expect(
+      parseFloat(figure?.style.getPropertyValue('--frame-ratio') ?? '')
+    ).toBeCloseTo(320 / 240, 4);
+  });
+
+  it('shows a loading animation for a user load and clears it when ready', () => {
+    const { gallery, frame, toggle } = setup();
+    new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
+
+    // 'one' is not the preloaded photo, so clicking it builds a fresh figure
+    // whose image is still loading.
+    gallery
+      .querySelector<HTMLAnchorElement>('[data-photo-id="one"]')
+      ?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true })
+      );
+
+    expect(frame.classList.contains('is-loading')).toBe(true);
+
+    frame.querySelector('img')?.dispatchEvent(new Event('load'));
+    expect(frame.classList.contains('is-loading')).toBe(false);
+  });
 });

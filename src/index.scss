@@ -144,25 +144,67 @@ img {
   min-width: 0;
   min-height: 0;
   display: grid;
-  place-items: center;
+
+  // A full-width column gives the figure a definite width to size against, so
+  // `100%` below resolves to the real available width (not the image's own,
+  // content-collapsed width) even before the photo has loaded.
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  position: relative;
 }
 
+.frame-content.is-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border: 4px solid rgb(32 33 36 / 20%);
+  border-block-start-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame-content.is-loading::after {
+    animation: none;
+  }
+}
+
+// Holds the next photo's <picture> off-screen so the browser fetches it before
+// the slideshow advances. Kept renderable (not display: none) so loading runs.
+.frame-preload {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+// Size the framed photo to its final, contained dimensions up front — width is
+// capped by the available width (100%) and by the height limit scaled by the
+// photo's aspect ratio — so the white frame never grows from a tiny box to the
+// photo's size while the image is still loading. --frame-ratio is set per photo.
 .frame-figure {
-  min-width: 0;
   margin: 0;
-  display: grid;
-  justify-items: center;
+  inline-size: min(100%, calc((100dvh - 5rem) * var(--frame-ratio, 1)));
 }
 
 .frame-figure picture {
-  display: grid;
-  place-items: center;
-  min-width: 0;
+  display: block;
 }
 
 .frame-figure img {
-  inline-size: auto;
-  max-inline-size: 100%;
+  inline-size: 100%;
+  block-size: auto;
   max-block-size: calc(100dvh - 5rem);
   border: var(--border-width) solid var(--color-text);
   background: var(--color-text);
@@ -255,6 +297,10 @@ img {
   .frame {
     grid-row: 2;
     padding: var(--space-s);
+  }
+
+  .frame-figure {
+    inline-size: min(100%, calc((100dvh - 12rem) * var(--frame-ratio, 1)));
   }
 
   .frame-figure img {

@@ -63,12 +63,20 @@ const createFrameFigure = (thumbnail: HTMLAnchorElement): HTMLElement => {
     element.setAttribute('sizes', sizes);
   }
 
-  image.id = 'frame-image';
+  // The `frame-image` id is assigned by showFigure when the figure is placed in
+  // the frame, so a figure waiting in the preload holder never duplicates it.
   if (thumbnail.dataset.frameSrc) {
     image.src = thumbnail.dataset.frameSrc;
   }
   image.removeAttribute('loading');
   image.decoding = 'async';
+
+  // Reserve the photo's final size before it loads (see --frame-ratio in CSS).
+  const ratio =
+    Number(image.getAttribute('width')) / Number(image.getAttribute('height'));
+  if (Number.isFinite(ratio) && ratio > 0) {
+    figure.style.setProperty('--frame-ratio', String(ratio));
+  }
 
   figure.append(picture);
 
@@ -78,7 +86,9 @@ const createFrameFigure = (thumbnail: HTMLAnchorElement): HTMLElement => {
 export class PhotoGallery {
   private selectedIndex = 0;
   private timerId: number | null = null;
+  private preloaded: { index: number; figure: HTMLElement } | null = null;
   private readonly thumbnails: HTMLAnchorElement[];
+  private readonly preloadHolder = document.createElement('div');
   private readonly reducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
   );
@@ -92,11 +102,18 @@ export class PhotoGallery {
       throw new Error('The gallery needs at least one photo.');
     }
 
+    // Off-screen holder that warms the next photo's image so advancing to it is
+    // instant; see preloadNext.
+    this.preloadHolder.className = 'frame-preload';
+    this.preloadHolder.setAttribute('aria-hidden', 'true');
+    document.body.append(this.preloadHolder);
+
     this.addEventListeners();
 
     // The frame for photo 0 is already server-rendered, so just mark the
     // selected thumbnail; rebuilding it would discard the in-flight LCP image.
     this.updateSelectedThumbnail(0, false);
+    this.preloadNext();
 
     if (this.options.autoAdvance !== false && !this.reducedMotion.matches) {
       this.startAutoAdvance();
@@ -201,7 +218,11 @@ export class PhotoGallery {
       throw new Error('Selected photo is missing.');
     }
 
-    this.options.frame.replaceChildren(createFrameFigure(thumbnail));
+    // Auto-advance shows the preloaded figure instantly; a user-initiated jump
+    // (which carries a source) may need a download, so it gets the spinner.
+    this.showFigure(this.takeFigure(this.selectedIndex, thumbnail), {
+      loading: options.source !== undefined,
+    });
     this.updateSelectedThumbnail(
       this.selectedIndex,
       options.focusThumbnail ?? false
@@ -219,6 +240,63 @@ export class PhotoGallery {
         source: options.source,
       });
     }
+
+    this.preloadNext();
+  }
+
+  // Reuse the figure preloaded for this index when we have it — the browser has
+  // already fetched its image — otherwise build a fresh one.
+  private takeFigure(index: number, thumbnail: HTMLAnchorElement): HTMLElement {
+    if (this.preloaded?.index === index) {
+      const { figure } = this.preloaded;
+      this.preloaded = null;
+      return figure;
+    }
+
+    return createFrameFigure(thumbnail);
+  }
+
+  private showFigure(figure: HTMLElement, options: { loading: boolean }): void {
+    const image = figure.querySelector('img');
+    if (image) {
+      image.id = 'frame-image';
+    }
+
+    this.options.frame.replaceChildren(figure);
+
+    // Show a spinner only while a not-yet-loaded image arrives; a preloaded
+    // (already complete) image is displayed immediately, with no flash.
+    if (options.loading && image && !image.complete) {
+      this.options.frame.classList.add('is-loading');
+      const clear = (): void =>
+        this.options.frame.classList.remove('is-loading');
+      image.addEventListener('load', clear, { once: true });
+      image.addEventListener('error', clear, { once: true });
+    } else {
+      this.options.frame.classList.remove('is-loading');
+    }
+  }
+
+  // Build the photo the slideshow will advance to next and park it off-screen
+  // so the browser downloads it before we need to show it.
+  private preloadNext(): void {
+    if (this.thumbnails.length <= 1) {
+      return;
+    }
+
+    const nextIndex = wrapIndex(this.selectedIndex + 1, this.thumbnails.length);
+    if (this.preloaded?.index === nextIndex) {
+      return;
+    }
+
+    const thumbnail = this.thumbnails[nextIndex];
+    if (!thumbnail) {
+      return;
+    }
+
+    const figure = createFrameFigure(thumbnail);
+    this.preloaded = { index: nextIndex, figure };
+    this.preloadHolder.replaceChildren(figure);
   }
 
   private updateSelectedThumbnail(index: number, shouldFocus: boolean): void {
