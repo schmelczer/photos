@@ -202,17 +202,14 @@ img {
   }
 
   .site-header {
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: var(--space-s);
     padding: var(--space-s);
   }
 
   .slideshow-toggle {
-    position: static;
+    inset-inline: auto var(--space-s);
   }
 
   .site-header h1 {
-    justify-self: center;
     writing-mode: horizontal-tb;
     transform: none;
     font-size: clamp(1.5rem, 7vw, 2rem);
