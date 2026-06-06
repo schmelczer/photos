@@ -71,6 +71,7 @@ jobs:
         run: npm run build
 
       - name: Copy build to host pages mount
-        run: |
-          apt update && apt install -y rsync
-          rsync -a --delete --mkpath --chmod=ugo=rwx dist/ /pages/photos/
+        uses: http://forgejo:3000/andras/ci-actions/deploy-pages@main
+        with:
+          source: dist
+          target: photos
