@@ -138,7 +138,7 @@ describe('PhotoGallery', () => {
     ).toBe('static/photos/one-2400.jpg');
   });
 
-  it('sets the aspect ratio so the frame reserves the photo size before it loads', () => {
+  it('keeps the photo dimensions on the frame image so it reserves space before it loads', () => {
     const { gallery, frame, toggle } = setup();
     new PhotoGallery({ gallery, frame, toggle, autoAdvance: false });
 
@@ -148,11 +148,11 @@ describe('PhotoGallery', () => {
         new MouseEvent('click', { bubbles: true, cancelable: true })
       );
 
-    // Thumbnail markup is 320x240, so the figure carries that ratio for CSS.
-    const figure = frame.querySelector<HTMLElement>('.frame-figure');
-    expect(
-      parseFloat(figure?.style.getPropertyValue('--frame-ratio') ?? '')
-    ).toBeCloseTo(320 / 240, 4);
+    // The thumbnail markup is 320x240; cloning keeps those attributes so the
+    // browser reserves the framed photo's size from its aspect ratio.
+    const image = frame.querySelector<HTMLImageElement>('.frame-figure img');
+    expect(image?.getAttribute('width')).toBe('320');
+    expect(image?.getAttribute('height')).toBe('240');
   });
 
   it('shows a loading animation for a user load and clears it when ready', () => {

@@ -116,9 +116,7 @@ const renderThumbnail = (photo, isCurrent) => {
   </a>`;
 };
 
-const renderFrame = (
-  photo
-) => `<figure class="frame-figure" style="--frame-ratio:${photo.aspectRatio}">
+const renderFrame = (photo) => `<figure class="frame-figure">
     ${renderPicture(
       photo,
       frameSizes(photo),

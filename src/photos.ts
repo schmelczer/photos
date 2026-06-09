@@ -71,13 +71,6 @@ const createFrameFigure = (thumbnail: HTMLAnchorElement): HTMLElement => {
   image.removeAttribute('loading');
   image.decoding = 'async';
 
-  // Reserve the photo's final size before it loads (see --frame-ratio in CSS).
-  const ratio =
-    Number(image.getAttribute('width')) / Number(image.getAttribute('height'));
-  if (Number.isFinite(ratio) && ratio > 0) {
-    figure.style.setProperty('--frame-ratio', String(ratio));
-  }
-
   figure.append(picture);
 
   return figure;

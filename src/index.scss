@@ -78,10 +78,8 @@ img {
   min-width: 0;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(
-      7rem,
-      14vmin
-    );
+  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(7rem,
+      14vmin);
   position: relative;
 }
 
@@ -143,14 +141,6 @@ img {
 .frame-content {
   min-width: 0;
   min-height: 0;
-  display: grid;
-
-  // A full-width column gives the figure a definite width to size against, so
-  // `100%` below resolves to the real available width (not the image's own,
-  // content-collapsed width) even before the photo has loaded.
-  grid-template-columns: minmax(0, 1fr);
-  align-content: center;
-  justify-items: center;
   position: relative;
 }
 
@@ -189,26 +179,21 @@ img {
   pointer-events: none;
 }
 
-// Size the framed photo to its final, contained dimensions up front — width is
-// capped by the available width (100%) and by the height limit scaled by the
-// photo's aspect ratio — so the white frame never grows from a tiny box to the
-// photo's size while the image is still loading. --frame-ratio is set per photo.
-.frame-figure {
-  margin: 0;
-  inline-size: min(100%, calc((100dvh - 5rem) * var(--frame-ratio, 1)));
-}
-
+.frame-figure,
 .frame-figure picture {
-  display: block;
+  display: contents;
 }
 
 .frame-figure img {
-  inline-size: 100%;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  inline-size: auto;
   block-size: auto;
-  max-block-size: calc(100dvh - 5rem);
+  max-inline-size: 100%;
+  max-block-size: 100%;
   border: var(--border-width) solid var(--color-text);
   background: var(--color-text);
-  object-fit: contain;
   box-shadow: 0 0 0 1px rgb(32 33 36 / 16%);
 }
 
@@ -243,13 +228,15 @@ img {
   }
 
   .site-header {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-around;
     padding: var(--space-s);
   }
 
   .slideshow-toggle {
-    inset-block-start: 50%;
-    inset-inline: auto var(--space-s);
-    transform: translateY(-50%);
+    position: static;
   }
 
   .site-header h1 {
@@ -298,13 +285,5 @@ img {
   .frame {
     grid-row: 2;
     padding: var(--space-s);
-  }
-
-  .frame-figure {
-    inline-size: min(100%, calc((100dvh - 12rem) * var(--frame-ratio, 1)));
-  }
-
-  .frame-figure img {
-    max-block-size: calc(100dvh - 12rem);
   }
 }
