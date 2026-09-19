@@ -59,6 +59,8 @@ img {
   place-items: center;
   position: relative;
   min-inline-size: 5rem;
+  max-block-size: 100dvh;
+  overflow: hidden;
   background: var(--color-accent);
   color: var(--color-text);
   padding: var(--space-m) var(--space-s);
@@ -78,9 +80,12 @@ img {
   min-width: 0;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(7rem,
-      14vmin);
+  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(
+      7rem,
+      14vmin
+    );
   position: relative;
+  overflow: hidden;
 }
 
 .rail {
@@ -142,6 +147,7 @@ img {
   min-width: 0;
   min-height: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .frame-content.is-loading::after {
