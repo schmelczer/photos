@@ -99,7 +99,7 @@ jobs:
           name: pages-deploy-0
           path: dist
       - name: Copy build to host pages mount
-        uses: https://git.schmelczer.dev/andras/ci-actions/deploy-pages@a415e2a50992af99b7b6dd3f02cca372d87b11f6
+        uses: https://git.schmelczer.dev/andras/ci-actions/deploy-pages@18419c79a58572be1bb3759b334f43306be44a29
         with:
           source: dist
           target: photos
