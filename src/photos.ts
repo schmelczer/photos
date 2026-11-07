@@ -12,7 +12,11 @@ type SelectOptions = {
   readonly focusThumbnail?: boolean;
   readonly pause?: boolean;
   readonly source?: string;
+  readonly updateUrl?: boolean;
 };
+
+const photoHash = (id: string): string =>
+  `#${new URLSearchParams({ photo: id })}`;
 
 export const requiredElement = <T extends Element>(
   selector: string,
@@ -95,6 +99,12 @@ export class PhotoGallery {
       throw new Error('The gallery needs at least one photo.');
     }
 
+    // Keep asset links as the no-JavaScript fallback, but let enhanced
+    // thumbnails be copied or opened in another tab as gallery deep links.
+    for (const thumbnail of this.thumbnails) {
+      thumbnail.href = photoHash(thumbnail.dataset.photoId ?? '');
+    }
+
     // Off-screen holder that warms the next photo's image so advancing to it is
     // instant; see preloadNext.
     this.preloadHolder.className = 'frame-preload';
@@ -103,12 +113,20 @@ export class PhotoGallery {
 
     this.addEventListeners();
 
-    // The frame for photo 0 is already server-rendered, so just mark the
-    // selected thumbnail; rebuilding it would discard the in-flight LCP image.
-    this.updateSelectedThumbnail(0, false);
-    this.preloadNext();
+    const linkedIndex = this.indexFromUrl();
+    if (linkedIndex > 0) {
+      this.select(linkedIndex, { updateUrl: false });
+    } else {
+      // Preserve the server-rendered first photo and its in-flight LCP image.
+      this.updateSelectedThumbnail(0, false);
+      this.preloadNext();
+    }
 
-    if (this.options.autoAdvance !== false && !this.reducedMotion.matches) {
+    if (
+      linkedIndex < 0 &&
+      this.options.autoAdvance !== false &&
+      !this.reducedMotion.matches
+    ) {
       this.startAutoAdvance();
     } else {
       this.updateToggle(false);
@@ -116,7 +134,24 @@ export class PhotoGallery {
   }
 
   private addEventListeners(): void {
+    window.addEventListener('hashchange', () => {
+      this.select(Math.max(0, this.indexFromUrl()), {
+        pause: true,
+        updateUrl: false,
+      });
+    });
+
     this.options.gallery.addEventListener('click', (event) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
       const thumbnail = (event.target as Element).closest<HTMLAnchorElement>(
         '[data-photo-id]'
       );
@@ -193,6 +228,29 @@ export class PhotoGallery {
     });
   }
 
+  private indexFromUrl(): number {
+    const id = new URLSearchParams(window.location.hash.slice(1)).get('photo');
+    return this.thumbnails.findIndex(
+      (thumbnail) => thumbnail.dataset.photoId === id
+    );
+  }
+
+  private updatePhotoUrl(id: string, recordHistory: boolean): void {
+    const url = new URL(window.location.href);
+    url.hash = photoHash(id);
+    if (url.href === window.location.href) {
+      return;
+    }
+
+    if (recordHistory) {
+      window.history.pushState(window.history.state, '', url);
+    } else {
+      // The slideshow keeps the current photo shareable without adding a
+      // history entry every seven seconds.
+      window.history.replaceState(window.history.state, '', url);
+    }
+  }
+
   private selectById(id: string | undefined, options: SelectOptions): void {
     const index = this.thumbnails.findIndex(
       (thumbnail) => thumbnail.dataset.photoId === id
@@ -214,7 +272,7 @@ export class PhotoGallery {
     // Auto-advance shows the preloaded figure instantly; a user-initiated jump
     // (which carries a source) may need a download, so it gets the spinner.
     this.showFigure(this.takeFigure(this.selectedIndex, thumbnail), {
-      loading: options.source !== undefined,
+      loading: options.source !== undefined || options.updateUrl === false,
     });
     this.updateSelectedThumbnail(
       this.selectedIndex,
@@ -223,6 +281,13 @@ export class PhotoGallery {
 
     if (options.pause) {
       this.pauseAutoAdvance();
+    }
+
+    if (options.updateUrl !== false) {
+      this.updatePhotoUrl(
+        thumbnail.dataset.photoId ?? '',
+        options.source !== undefined
+      );
     }
 
     // Only user-initiated selections carry a source; auto-advance stays

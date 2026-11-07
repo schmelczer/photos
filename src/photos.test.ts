@@ -27,6 +27,7 @@ const thumbnail = (id: string, order: number, alt: string): string => `
   </a>`;
 
 const setup = () => {
+  window.history.replaceState(null, '', '/');
   vi.stubGlobal('matchMedia', () => ({
     matches: false,
     media: '(prefers-reduced-motion: reduce)',

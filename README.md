@@ -61,6 +61,12 @@ Photo order, captions, and alt text live in `src/photo-catalog.json`. Add new so
 
 The generated files under `src/generated/` and `public/static/photos/` are intentionally ignored because they are reproducible from the source images and catalog.
 
+## Gallery Navigation
+
+Photo selections use `#photo=<id>` links, where the ID comes from the source filename rather than its position or generated asset hash. Selecting a thumbnail or using the arrow, Home, or End keys updates the URL; thumbnails can also be copied or opened in another tab. Reloading or opening a photo link selects that photo with the slideshow paused. Back and Forward restore selections, and automatic slideshow advances replace the current URL without adding history entries. Missing or unknown IDs fall back to the first photo.
+
+The header's Portfolio link returns to `https://schmelczer.dev/`. Without JavaScript, thumbnails still link directly to photo assets.
+
 ## Metadata
 
 Source photos should not contain private EXIF/XMP/IPTC metadata. Check with:

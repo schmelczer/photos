@@ -80,10 +80,8 @@ img {
   min-width: 0;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(
-      7rem,
-      14vmin
-    );
+  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(7rem,
+      14vmin);
   position: relative;
   overflow: hidden;
 }
@@ -234,18 +232,21 @@ img {
   }
 
   .site-header {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: space-around;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-xs) var(--space-s);
     padding: var(--space-s);
   }
 
   .slideshow-toggle {
     position: static;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
   }
 
   .site-header h1 {
+    grid-column: 1 / -1;
+    grid-row: 1;
     writing-mode: horizontal-tb;
     transform: none;
     font-size: clamp(1.5rem, 7vw, 2rem);
