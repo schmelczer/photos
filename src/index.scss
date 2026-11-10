@@ -76,12 +76,21 @@ img {
   white-space: nowrap;
 }
 
+.portfolio-link {
+  position: absolute;
+  inset-block-end: var(--space-s);
+  color: inherit;
+  font-size: 0.875rem;
+}
+
 .gallery {
   min-width: 0;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(7rem,
-      14vmin);
+  grid-template-columns: minmax(5rem, 10vmin) minmax(0, 1fr) minmax(
+      7rem,
+      14vmin
+    );
   position: relative;
   overflow: hidden;
 }
@@ -235,6 +244,13 @@ img {
     grid-template-columns: 1fr auto;
     gap: var(--space-xs) var(--space-s);
     padding: var(--space-s);
+  }
+
+  .portfolio-link {
+    position: static;
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
   }
 
   .slideshow-toggle {

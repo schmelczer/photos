@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node scripts/generate-assets.mjs && vite --host 0.0.0.0",
     "lint": "eslint . --fix && stylelint \"src/**/*.scss\" --fix && prettier --write .",
-    "lint:check": "node scripts/generate-assets.mjs && node scripts/check-image-metadata.mjs && tsc --noEmit && eslint . && stylelint \"src/**/*.scss\" && prettier --check .",
+    "lint:check": "prettier --check . && tsc --noEmit && eslint . && stylelint \"src/**/*.scss\" && node scripts/check-image-metadata.mjs && node scripts/generate-assets.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "build": "node scripts/generate-assets.mjs && vite build"
@@ -47,7 +47,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.0",
     "vite": "^8.0.14",
-    "vitest": "^4.1.7",
+    "vitest": "^5.0.0",
     "@plausible-analytics/tracker": "^0.4.5"
   }
 }
