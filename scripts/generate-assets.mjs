@@ -3,6 +3,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { createPhotoAssetCache } from './photo-asset-cache.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -176,6 +177,11 @@ const generate = async () => {
   }));
 
   await assertCatalogMatchesFiles(catalog);
+  if (process.argv.includes('--check')) {
+    console.log(`Validated ${catalog.length} photo catalog entries.`);
+    return;
+  }
+
   await mkdir(publicPhotoDir, { recursive: true });
   await mkdir(generatedDir, { recursive: true });
 
@@ -186,10 +192,14 @@ const generate = async () => {
   // startup timeout.
   const existingFiles = new Set(await readdir(publicPhotoDir));
   const expectedFiles = new Set();
+  const restoreAsset = createPhotoAssetCache(process.env.PHOTO_ASSET_CACHE_URL);
+  let downloaded = 0;
+  let encoded = 0;
 
   const photos = [];
 
   for (const entry of catalog) {
+    console.log(`[${entry.order}/${catalog.length}] Preparing ${entry.file}`);
     const inputPath = path.join(sourceDir, entry.file);
     const input = await readFile(inputPath);
     const hash = createHash('sha256')
@@ -224,7 +234,15 @@ const generate = async () => {
       await Promise.all(
         variants
           .filter(({ filename }) => !existingFiles.has(filename))
-          .map(async ({ outputPath, width }) => {
+          .map(async (variant) => {
+            if (
+              await restoreAsset({ ...variant, extension: format.extension })
+            ) {
+              downloaded += 1;
+              return;
+            }
+
+            const { outputPath, width } = variant;
             const pipeline = sharp(input).rotate().resize({
               width,
               withoutEnlargement: true,
@@ -237,6 +255,7 @@ const generate = async () => {
             } else {
               await pipeline.jpeg(format.options).toFile(outputPath);
             }
+            encoded += 1;
           })
       );
 
@@ -310,7 +329,7 @@ ${landscapes}
           0
         ),
       0
-    )} responsive assets.`
+    )} responsive assets (${downloaded} downloaded, ${encoded} encoded).`
   );
 };
 

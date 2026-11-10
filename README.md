@@ -37,7 +37,7 @@ Run the full local validation suite with:
 npm run lint:check
 ```
 
-This generates assets (validating the photo catalog against `src/pictures/` in the process), checks source photos for EXIF/XMP/IPTC metadata, type-checks, lints TypeScript and SCSS, and checks formatting.
+This checks formatting, type-checks, lints TypeScript and SCSS, checks source photos for EXIF/XMP/IPTC metadata, and validates the photo catalog against `src/pictures/`. Image encoding runs separately as part of the build.
 
 Run unit tests separately:
 
@@ -60,6 +60,8 @@ Playwright requires a browser installation. CI installs Chromium before running 
 Photo order, captions, and alt text live in `src/photo-catalog.json`. Add new source JPEGs to `src/pictures/`, then add a matching catalog entry. `npm run dev`, `npm run lint:check`, and `npm run build` validate that the catalog and source directory match.
 
 The generated files under `src/generated/` and `public/static/photos/` are intentionally ignored because they are reproducible from the source images and catalog.
+
+CI sets `PHOTO_ASSET_CACHE_URL=https://photos.schmelczer.dev/static/photos/` to reuse published image variants. Filenames include a hash of the source photo and encoding settings, so changed photos or settings produce new files. Downloads are checked for image format and dimensions and saved atomically. Missing variants are encoded locally with the same quality settings. Builds without this variable work offline; a clean build encoding every photo can take around 25 minutes on the two-core runner. The generator reports progress for each photo.
 
 ## Gallery Navigation
 
@@ -85,4 +87,4 @@ Review image changes after stripping because this rewrites the JPEG files.
 
 ## Deployment
 
-The Forgejo workflow validates pull requests and trusted pushes with `npm ci`, `npm run lint:check`, `npm test`, `npm run build`, and a Playwright smoke test. Only pushes to `main` deploy, by copying `dist/` to `/pages/photos/`.
+The Forgejo workflow validates pull requests and trusted pushes with `npm ci`, `npm run lint:check`, `npm test`, `npm run build`, and a Playwright smoke test. CI previews the existing build for the smoke test instead of rebuilding. Trusted human pushes to `main` hand that validated `dist/` artifact to the deploy job and the Pages copier, which publishes it to `/pages/photos/` without another build.
