@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node scripts/generate-assets.mjs && vite --host 0.0.0.0",
     "lint": "eslint . --fix && stylelint \"src/**/*.scss\" --fix && prettier --write .",
-    "lint:check": "node scripts/generate-assets.mjs && node scripts/check-image-metadata.mjs && tsc --noEmit && eslint . && stylelint \"src/**/*.scss\" && prettier --check .",
+    "lint:check": "prettier --check . && tsc --noEmit && eslint . && stylelint \"src/**/*.scss\" && node scripts/check-image-metadata.mjs && node scripts/generate-assets.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "build": "node scripts/generate-assets.mjs && vite build"
