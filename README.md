@@ -87,4 +87,4 @@ Review image changes after stripping because this rewrites the JPEG files.
 
 ## Deployment
 
-The Forgejo workflow validates pull requests and trusted pushes with `npm ci`, `npm run lint:check`, `npm test`, `npm run build`, and a Playwright smoke test. CI previews the existing build for the smoke test instead of rebuilding. Trusted human pushes to `main` hand that validated `dist/` artifact to the deploy job and the Pages copier, which publishes it to `/pages/photos/` without another build.
+The Forgejo workflow validates pull requests and trusted pushes with `npm ci`, `npm run lint:check`, `npm test`, `npm run build`, and a Playwright smoke test. CI previews the existing build for the smoke test instead of rebuilding. Trusted human pushes to `main` upload the validated `dist/` once as `pages-deploy-0`. The deploy job confirms that artifact exists for the current run, then the Pages copier publishes it to `/pages/photos/`. Deployment does not rebuild or transfer the photos between jobs.

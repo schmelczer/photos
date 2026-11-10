@@ -56,7 +56,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' && contains(fromJSON('["andras","ruby336688"]'), github.actor) }}
         uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
         with:
-          name: photos-validated-dist
+          name: pages-deploy-0
           path: dist
           if-no-files-found: error
           retention-days: 1
@@ -73,16 +73,24 @@ jobs:
     # its result to Forgejo's dependent-job scheduler instead of repeating it.
     if: ${{ needs.validate.outputs.publish == 'success' }}
     steps:
-      - name: Download validated build
-        uses: https://github.com/actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
-        with:
-          name: photos-validated-dist
-          path: dist
-
-      - name: Upload static site artifact 1
-        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
-        with:
-          name: pages-deploy-0
-          path: dist
-          if-no-files-found: error
-          retention-days: 1
+      # The Pages copier reads artifacts for this run after this job succeeds.
+      # Confirm the tested artifact instead of transferring the photos again.
+      - name: Release validated site to Pages
+        env:
+          ARTIFACTS_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts
+          ARTIFACT_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          const response = await fetch(process.env.ARTIFACTS_URL, {
+            headers: { Authorization: `token ${process.env.ARTIFACT_TOKEN}` },
+            signal: AbortSignal.timeout(10_000),
+          });
+          if (!response.ok) throw new Error(`Artifact lookup failed: HTTP ${response.status}`);
+          const artifacts = await response.json();
+          const site = artifacts.find((artifact) =>
+            artifact.name === 'pages-deploy-0' && !artifact.expired &&
+            String(artifact.run_id) === process.env.GITHUB_RUN_ID
+          );
+          if (!site) throw new Error('The validated site artifact is missing.');
+          console.log(`Validated artifact ${site.id} is ready for the Pages copier.`);
+          JS
