@@ -9,6 +9,8 @@ on:
 
 jobs:
   validate:
+    outputs:
+      publish: ${{ steps.validated_build.outcome }}
     env:
       PHOTO_ASSET_CACHE_URL: https://photos.schmelczer.dev/static/photos/
     runs-on:
@@ -50,6 +52,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Save validated build
+        id: validated_build
         if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' && contains(fromJSON('["andras","ruby336688"]'), github.actor) }}
         uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
         with:
@@ -66,7 +69,9 @@ jobs:
       ${{ (github.actor == 'renovate-bot' || github.event.pull_request.user.login == 'renovate-bot' || startsWith(github.ref, 'refs/heads/renovate/') || startsWith(github.head_ref,
       'renovate/')) && 'renovate' || 'docker' }}
     needs: validate
-    if: ${{ github.event_name == 'push' && github.event.ref == 'refs/heads/main' && contains(fromJSON('["andras","ruby336688"]'), github.actor) }}
+    # The upload step evaluates the trusted-main condition on the runner. Pass
+    # its result to Forgejo's dependent-job scheduler instead of repeating it.
+    if: ${{ needs.validate.outputs.publish == 'success' }}
     steps:
       - name: Download validated build
         uses: https://github.com/actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
